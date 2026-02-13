@@ -10,6 +10,8 @@ from playwriter.llm.registry import get_provider
 from playwriter.prompts.loader import PromptLoader
 from playwriter.services.character import CharacterService
 from playwriter.services.game import GameService
+from playwriter.services.dice import DiceService
+from playwriter.services.narrative_engine import NarrativeEngine
 from playwriter.services.pipeline import PipelineService
 from playwriter.services.scene import SceneService
 from playwriter.services.seeding import SeedingService
@@ -79,3 +81,24 @@ def get_trope_service() -> TropeService:
 
 def get_pipeline_service() -> PipelineService:
     return PipelineService(_strong(), _fast(), _prompts, _trope_service)
+
+
+# --- Narrative Engine (singleton — holds world state in memory) ---
+
+_narrative_engine: Optional[NarrativeEngine] = None
+
+
+def get_narrative_engine() -> NarrativeEngine:
+    global _narrative_engine
+    if _narrative_engine is None:
+        _narrative_engine = NarrativeEngine(
+            strong_llm=_strong(),
+            fast_llm=_fast(),
+            prompts=_prompts,
+            trope_service=_trope_service,
+        )
+    return _narrative_engine
+
+
+def get_dice_service() -> DiceService:
+    return DiceService(fast_llm=_fast(), trope_service=_trope_service, prompts=_prompts)

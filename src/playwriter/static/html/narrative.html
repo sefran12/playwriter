@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playwriter — Narrative Engine</title>
+  <link rel="stylesheet" href="/static/css/narrative.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ─── ERROR TOAST ───────────────────────────────── -->
+    <div id="error-toast" class="error-toast hidden"></div>
+
+    <!-- ─── SETUP PANEL ───────────────────────────────── -->
+    <section id="setup-panel" class="panel">
+      <header>
+        <h1>Playwriter</h1>
+        <p class="subtitle">Narrative Engine</p>
+        <p class="subtitle-desc">Multi-scale temporal narrative generation with stochastic action resolution</p>
+      </header>
+
+      <div class="setup-grid">
+        <div class="form-group provider-row">
+          <label for="provider-select">LLM Provider</label>
+          <select id="provider-select">
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="groq">Groq</option>
+          </select>
+        </div>
+
+        <div class="form-group provider-row">
+          <label for="model-select">Model</label>
+          <select id="model-select">
+            <option value="">(Provider Default)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="seed-description">
+            World Seed
+            <button type="button" id="load-sample-btn" class="btn-small">Load Sample</button>
+          </label>
+          <textarea id="seed-description" rows="6"
+            placeholder="Describe your world: setting, themes, conflict, characters... The engine will generate everything from this seed."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mode-select">Mode</label>
+            <select id="mode-select">
+              <option value="autonomous">Autonomous</option>
+              <option value="director">Director</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="trope-pool-size">Trope Pool Size</label>
+            <input type="number" id="trope-pool-size" value="30" min="5" max="100" />
+          </div>
+          <div class="form-group">
+            <label for="num-characters">Characters (blank = all)</label>
+            <input type="number" id="num-characters" value="" min="2" max="20" placeholder="auto" />
+          </div>
+        </div>
+
+        <button id="create-world-btn" class="btn-primary">Create World & Begin</button>
+        <div id="generation-log" class="generation-log hidden">
+          <div id="generation-log-entries"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── MAIN ENGINE PANEL ────────────────────────── -->
+    <section id="engine-panel" class="panel hidden">
+
+      <!-- Top bar -->
+      <header class="engine-header">
+        <div class="engine-header-left">
+          <h2 id="world-title">Narrative World</h2>
+          <span id="world-status" class="status-badge">initialized</span>
+        </div>
+        <div class="engine-header-right">
+          <select id="mode-toggle">
+            <option value="autonomous">Autonomous</option>
+            <option value="director">Director</option>
+          </select>
+          <button id="back-btn" class="btn-small btn-danger">New World</button>
+        </div>
+      </header>
+
+      <!-- Main layout: Timeline | Prose | Controls -->
+      <div class="engine-layout">
+
+        <!-- LEFT: Timeline -->
+        <aside class="timeline-panel">
+          <h3>Timeline</h3>
+          <div id="timeline" class="timeline"></div>
+        </aside>
+
+        <!-- CENTER: Prose reader -->
+        <main class="prose-panel">
+          <div id="prose-reader" class="prose-reader">
+            <p class="prose-placeholder">Create a world to begin generating narrative...</p>
+          </div>
+        </main>
+
+        <!-- RIGHT: Control panel -->
+        <aside class="control-panel">
+          <h3>Controls</h3>
+
+          <!-- Advance controls -->
+          <div class="control-section">
+            <div class="control-title">Advance</div>
+            <div class="control-row">
+              <button id="advance-beat-btn" class="btn-control">+1 Beat</button>
+              <button id="advance-5-btn" class="btn-control">+5 Beats</button>
+            </div>
+            <div class="control-row">
+              <button id="advance-scene-btn" class="btn-control">Full Scene</button>
+              <button id="advance-act-btn" class="btn-control">Full Act</button>
+            </div>
+            <div class="control-row">
+              <label class="auto-label">
+                <input type="checkbox" id="auto-advance" />
+                Auto-advance
+              </label>
+              <button id="stream-btn" class="btn-control btn-stream">Stream</button>
+            </div>
+          </div>
+
+          <!-- Dice display -->
+          <div class="control-section">
+            <div class="control-title">Last Dice Roll</div>
+            <div id="dice-display" class="dice-display">
+              <div class="dice-value" id="dice-value">--</div>
+              <div class="dice-details" id="dice-details">Roll to begin</div>
+            </div>
+          </div>
+
+          <!-- Director controls (hidden in autonomous) -->
+          <div id="director-controls" class="control-section hidden">
+            <div class="control-title">Director</div>
+            <div class="form-group-sm">
+              <input type="text" id="dir-actor" placeholder="Actor name" />
+              <input type="text" id="dir-action" placeholder="Action" />
+              <input type="number" id="dir-roll" placeholder="Force roll (1-100)" min="1" max="100" />
+              <button id="dir-override-btn" class="btn-control">Override Dice</button>
+            </div>
+            <div class="form-group-sm">
+              <input type="text" id="dir-event" placeholder="World event description" />
+              <button id="dir-inject-btn" class="btn-control">Inject Event</button>
+            </div>
+            <div class="form-group-sm">
+              <input type="text" id="dir-trope" placeholder="Search trope..." />
+              <button id="dir-trope-btn" class="btn-control">Force Trope</button>
+            </div>
+          </div>
+
+          <!-- Active tropes -->
+          <div class="control-section">
+            <div class="control-title">Active Tropes</div>
+            <div id="tropes-display" class="tropes-list">
+              <span class="dim">None yet</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Bottom strip: Characters -->
+      <div class="bottom-strip">
+        <div class="strip-section">
+          <h3>Characters</h3>
+          <div id="character-strip" class="character-strip">
+            <span class="dim">No characters yet</span>
+          </div>
+        </div>
+
+        <!-- Thread tracker -->
+        <div class="strip-section">
+          <h3>Threads</h3>
+          <div id="thread-tracker" class="thread-tracker">
+            <span class="dim">No threads yet</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script src="/static/js/narrative.js"></script>
+</body>
+</html>

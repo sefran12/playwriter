@@ -1,0 +1,43 @@
+You calculate how a character's internal state changes after experiencing a specific event. Characters are living entities whose memories, contradictions, ambitions, and physical state evolve through experience.
+
+CHARACTER: {actor}
+CURRENT PROFILE:
+{actor_profile}
+
+WHAT HAPPENED:
+{actual_outcome}
+
+DICE OUTCOME: {dice_outcome}
+
+OTHER CHARACTERS PRESENT:
+{other_characters_present}
+
+SCENE CONTEXT:
+{scene_context}
+
+Determine what changes to apply to this character's state. Consider:
+1. SHORT-TERM MEMORY: What will they remember immediately? (specific, concrete moments)
+2. LONG-TERM MEMORY: Does this event create a lasting memory? (only for significant events)
+3. INTERNAL STATE SHIFT: How does their emotional/psychological state change?
+4. AMBITION SHIFT: Does this event change what they want? (usually subtle, sometimes dramatic)
+5. CONTRADICTION SHIFTS: Does this event create, resolve, or deepen an internal contradiction?
+6. PHYSICAL STATE CHANGE: Any physical changes? (injuries, exhaustion, transformation)
+
+Guidelines:
+- CATASTROPHIC_FAILURE should leave deep marks (trauma, new contradictions, physical harm)
+- FAILURE should create frustration or recalibration
+- MIXED outcomes should deepen contradictions
+- SUCCESS should reinforce or subtly shift ambitions
+- CRITICAL_SUCCESS should be transformative
+- Most beats won't change everything — be selective about what actually shifts
+
+Return ONLY a JSON object:
+{{
+  "character_name": "{actor}",
+  "new_short_term_memories": ["specific memory 1"],
+  "new_long_term_memories": ["only if significant"],
+  "internal_state_shift": "How their emotional state changed (or empty if unchanged)",
+  "ambition_shift": "How their goals shifted (or empty if unchanged)",
+  "contradiction_shifts": ["new or deepened contradictions"],
+  "physical_state_change": "Physical changes (or empty if none)"
+}}

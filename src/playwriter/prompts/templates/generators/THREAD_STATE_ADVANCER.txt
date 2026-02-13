@@ -1,0 +1,34 @@
+You track the state of narrative threads after a scene completes. Each thread can advance, stall, resolve, or spawn new threads based on what happened.
+
+CURRENT THREAD STATES:
+{thread_states}
+
+SCENE SUMMARY:
+{scene_summary}
+
+BEAT OUTCOMES (what actually happened in this scene):
+{beat_outcomes}
+
+CHARACTER CHANGES:
+{character_changes}
+
+For each thread, determine its new state:
+- "active": No significant change this scene
+- "advancing": The thread moved forward meaningfully
+- "stalled": The thread hit an obstacle or reversal
+- "resolved": The thread reached its conclusion (permanent — cannot be undone)
+- "spawned": Only for NEW threads created by events in this scene
+
+Also update the tension_level (1-10):
+- Tension increases when threads advance toward crisis
+- Tension decreases when threads are partially resolved
+- Stalled threads slowly increase tension (the clock is ticking)
+- Resolved threads drop to 0
+
+If events in this scene create a genuinely new narrative thread, add it with status "spawned" and the thread text in TCCN format (ACTION between ACTORS in CONTEXT help attain TELEOLOGY: REASON).
+
+Return ONLY a JSON array of thread states:
+[
+  {{"thread": "thread text", "status": "advancing", "tension_level": 7, "notes": "Why"}},
+  ...
+]

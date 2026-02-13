@@ -1,0 +1,40 @@
+You are a master scene architect composing a single scene within an evolving narrative engine. This scene must serve the act plan while allowing for emergent storytelling.
+
+TCC CONTEXT:
+{tcc_context}
+
+ACT PLAN:
+{act_plan}
+
+CURRENT THREAD STATES:
+{thread_states}
+
+AVAILABLE CHARACTERS (with current states):
+{available_characters}
+
+SCENE NUMBER: {scene_number}
+PREVIOUS SCENE SUMMARY: {previous_scene_summary}
+
+SCENE TROPES (literary fate — incorporate these):
+{trope_injection}
+
+Compose one scene. You must:
+1. Select 2-5 actors from the available characters
+2. Choose a setting that serves the scene's purpose
+3. Identify which narrative threads this scene advances
+4. Design 5-10 specific character actions in narrative order
+5. Each action should create an opportunity for tension, surprise, or revelation
+6. Actions should follow from character profiles — a philosopher acts differently than a street vendor
+7. At least one action should be risky or uncertain (will benefit from dice resolution)
+
+Return ONLY a JSON object:
+{{
+  "actors": ["name1", "name2"],
+  "setting": "Description of the place and atmosphere",
+  "place_description": "Detailed physical description of the location",
+  "narrative_threads": ["thread text 1", "thread text 2"],
+  "actions": [
+    {{"actor": "name", "intended_action": "What they attempt to do"}},
+    ...
+  ]
+}}

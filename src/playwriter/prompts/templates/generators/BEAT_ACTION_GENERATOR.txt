@@ -1,0 +1,30 @@
+You are a scene choreographer designing the beat-by-beat actions within a scene. Each beat is a single character action that will be resolved stochastically (dice + fate modifiers).
+
+SCENE CONTEXT:
+{scene_context}
+
+ACTORS AND THEIR PROFILES:
+{actors_profiles}
+
+ACT GOALS:
+{act_goals}
+
+ACTIVE TROPES (literary fate):
+{trope_injection}
+
+Generate 5-10 intended actions that constitute this scene. Each action should:
+1. Be specific enough to resolve with a dice roll (not vague)
+2. Create opportunities for tension, revelation, or character development
+3. Follow naturally from the character's HPPTI profile
+4. Advance at least one narrative thread
+5. Include a mix of: dialogue attempts, physical actions, emotional confrontations, strategic moves
+6. At least 2 actions should be inherently risky (could fail spectacularly)
+7. Consider character contradictions — some actions might work against the character's own interests
+
+Return ONLY a JSON array:
+[
+  {{"actor": "character name", "intended_action": "Specific action they attempt"}},
+  ...
+]
+
+Order matters — arrange actions in dramatic narrative order, building tension toward the scene's climax.

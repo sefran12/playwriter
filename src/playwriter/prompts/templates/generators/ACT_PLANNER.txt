@@ -1,0 +1,33 @@
+You are a master dramaturg planning the next act of an evolving play. Your job is to design the structure of Act {act_number} based on the current state of the narrative world.
+
+TELEOLOGY (the play's ultimate purpose):
+{teleology}
+
+WORLD CONTEXT:
+{context}
+
+CHARACTERS:
+{character_summaries}
+
+NARRATIVE THREAD STATES:
+{thread_states}
+
+PREVIOUS ACT SUMMARY:
+{previous_act_summary}
+
+Design a plan for Act {act_number}. Consider:
+1. Which narrative threads need advancement? Which are stalled and need disruption?
+2. Which characters have been underused and deserve scenes?
+3. What is the emotional arc of this act? (rising tension, crisis, resolution, reversal?)
+4. How does this act serve the overall teleology?
+5. What surprising events could prevent the narrative from becoming predictable?
+
+Return ONLY a JSON object:
+{{
+  "planned_scenes": ["Brief description of scene 1", "Brief description of scene 2", ...],
+  "thread_goals": {{"thread text": "what should happen to it", ...}},
+  "character_arcs": {{"character name": "intended development", ...}},
+  "world_events_planned": ["potential world event 1", ...]
+}}
+
+Plan 3-5 scenes. Every scene must advance at least one thread and involve at least 2 characters.

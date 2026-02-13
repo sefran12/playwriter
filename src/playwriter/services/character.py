@@ -152,7 +152,12 @@ class CharacterService:
 
         # Build the user prompt with conversation history
         history = session.memory.to_prompt_text()
-        user_prompt = f"Conversation so far:\n{history}\n\nRespond as the character."
+        user_prompt = (
+            f"Conversation so far:\n{history}\n\n"
+            f"Respond as the character would naturally speak in this specific situation. "
+            f"Follow their Voice & Speech Style. Use the play format: (action description) Dialogue. "
+            f"Keep it real — not every line needs to be profound."
+        )
 
         response = await llm.complete(
             system_prompt=session.system_prompt,

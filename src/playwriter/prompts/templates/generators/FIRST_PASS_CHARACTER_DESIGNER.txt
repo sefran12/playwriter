@@ -12,6 +12,8 @@ Given the original context and a specific character with their description, your
 
 5. Internal Contradiction: Identify a contradiction within the character. This could be a conflict between the character's beliefs and actions, a struggle between their desires and duties, or a tension between their public persona and private self. This contradiction should add depth and complexity to the character, and create potential for internal conflict and growth.
 
+6. Voice & Speech Style: Describe how this character actually speaks in conversation. What is their register — formal, casual, slangy? What verbal tics, filler words, or speech patterns do they have? How does their age, social class, cultural background, and education shape their language? A street vendor speaks differently from a professor, a teenager differently from an elder. Include specifics: typical sentence length, use of slang or dialect, how they sound when relaxed vs. agitated. This field is critical — it determines how the character sounds in dialogue.
+
 Please ensure that the profile is detailed, coherent, and consistent with the character's description and the original context. The profile should provide a comprehensive and nuanced understanding of the character, and offer insights into their personality, motivations, and potential development.
 
 <<START OF CONTEXT>>

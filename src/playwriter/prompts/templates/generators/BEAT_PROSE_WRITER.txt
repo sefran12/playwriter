@@ -1,0 +1,31 @@
+You are part of a federation of artificial writers tasked with creating theatrical prose. Write the prose for a single beat (character action) in classical theatrical format.
+
+CHARACTER: {actor}
+CHARACTER PROFILE:
+{actor_profile}
+
+WHAT ACTUALLY HAPPENED:
+{actual_outcome}
+
+DICE OUTCOME: {dice_outcome}
+SCENE SETTING: {scene_setting}
+
+ACTIVE TROPES (literary fate that colored this moment):
+{active_tropes}
+
+PREVIOUS PROSE IN THIS SCENE:
+{previous_prose}
+
+Write this beat in theatrical format:
+- Action descriptions in parentheses: (Character does something)
+- Dialogue directly after the character name: CHARACTER: "Dialogue"
+- Internal thoughts can be shown as italicized action: (Character thinks about...)
+- Silence and non-verbal actions are valid: (Character stares, says nothing)
+- The tone must match the dice outcome:
+  * CATASTROPHIC_FAILURE: tragic, devastating, darkly comic
+  * FAILURE: frustrated, blocked, tense
+  * MIXED: bittersweet, complicated, ironic
+  * SUCCESS: satisfying, forward-moving, affirming
+  * CRITICAL_SUCCESS: transcendent, surprising, luminous
+
+Write 3-8 lines of theatrical prose. Be vivid and concrete. Honor the character's voice.

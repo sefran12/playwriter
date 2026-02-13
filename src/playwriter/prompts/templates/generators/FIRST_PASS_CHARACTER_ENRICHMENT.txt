@@ -7,6 +7,7 @@ Given to you will be:
 3. Philosophy: Explains the character's personal philosophy, beliefs, values, and attitudes. This should include the character's worldview, moral compass, and guiding principles. Consider what the character believes about themselves, others, and the world around them.
 4. Teleology: Describes the character's purpose, goals, or objectives. This should include what the character wants to achieve, what motivates them, and what they are willing to do to reach their goals. Consider both short-term and long-term goals, as well as personal and professional objectives.
 5. Internal Contradiction: Identifies a contradiction within the character. This could be a conflict between the character's beliefs and actions, a struggle between their desires and duties, or a tension between their public persona and private self.
+6. Voice & Speech Style: Describes how this character actually speaks — their register, slang, verbal tics, sentence structure, and how their background shapes their language.
 
 Your task is to construct a rich interal representation of the philosophy and personality of the character such that this character is
 as well determined by your descripition as possible. You do this by iteratively searching for Authors, previous famous Characters or Personalities

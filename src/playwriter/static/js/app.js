@@ -19,7 +19,8 @@ const injectTropes   = $('#inject-tropes');
 const tropePreview   = $('#trope-preview');
 const startBtn       = $('#start-btn');
 const loadSampleBtn  = $('#load-sample-btn');
-const setupStatus    = $('#setup-status');
+const generationLog     = $('#generation-log');
+const generationEntries = $('#generation-log-entries');
 const charNameDisp   = $('#character-name-display');
 const sceneLabel     = $('#scene-label');
 const profileToggle  = $('#profile-toggle');
@@ -176,6 +177,45 @@ function onTropeToggle() {
   }
 }
 
+// ─── Generation log helpers ─────────────────────────────────────────────
+function showLog() {
+  generationEntries.innerHTML = '';
+  generationLog.classList.remove('hidden');
+}
+
+function hideLog() {
+  generationLog.classList.add('hidden');
+}
+
+function appendLogEntry(step, detail, isActive = true) {
+  // Mark previous active entry as done
+  const prev = generationEntries.querySelector('.log-entry.active');
+  if (prev) {
+    prev.classList.remove('active');
+    prev.classList.add('done');
+    const spinner = prev.querySelector('.spinner');
+    if (spinner) spinner.remove();
+  }
+
+  const div = document.createElement('div');
+  div.className = `log-entry${isActive ? ' active' : ' done'}`;
+  div.innerHTML = `${isActive ? '<span class="spinner"></span>' : ''}`
+    + `<span class="log-step">${escapeHtml(step)}</span>`
+    + (detail ? `<div class="log-detail">${escapeHtml(detail)}</div>` : '');
+  generationEntries.appendChild(div);
+  generationLog.scrollTop = generationLog.scrollHeight;
+}
+
+function finalizeLog() {
+  const prev = generationEntries.querySelector('.log-entry.active');
+  if (prev) {
+    prev.classList.remove('active');
+    prev.classList.add('done');
+    const spinner = prev.querySelector('.spinner');
+    if (spinner) spinner.remove();
+  }
+}
+
 // ─── Start arena ────────────────────────────────────────────────────────
 async function startArena() {
   const tccContext = tccInput.value.trim();
@@ -183,19 +223,17 @@ async function startArena() {
   const sceneDesc = sceneDescInput.value.trim();
 
   if (!tccContext || !charDesc || !sceneDesc) {
-    showStatus('Please fill in all fields.', 'error');
     showToast('Please fill in all fields.');
     return;
   }
 
   startBtn.disabled = true;
-  showStatus('<span class="spinner"></span> Generating character and entering scene...', 'loading');
+  showLog();
 
   try {
-    // Switch provider if changed
     await switchProvider();
 
-    const res = await fetch(`${API}/api/arena/start`, {
+    const res = await fetch(`${API}/api/arena/start/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -206,13 +244,51 @@ async function startArena() {
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error(err.detail || `Server error ${res.status}`);
     }
 
-    const data = await res.json();
-    sessionId = data.session_id;
-    characterName = data.character_name || 'Character';
+    // Read SSE stream
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let result = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const event = JSON.parse(line.slice(6));
+
+          if (event.step === 'error') {
+            throw new Error(event.detail || 'Generation failed');
+          }
+
+          if (event.step === 'done') {
+            result = event;
+          } else {
+            appendLogEntry(event.step, event.detail);
+          }
+        } catch (parseErr) {
+          if (parseErr.message && !parseErr.message.includes('JSON')) throw parseErr;
+        }
+      }
+    }
+
+    if (!result || !result.session_id) {
+      throw new Error('Character generation did not complete');
+    }
+
+    finalizeLog();
+    sessionId = result.session_id;
+    characterName = result.character_name || 'Character';
 
     // Transition to game panel
     setupPanel.classList.add('hidden');
@@ -220,18 +296,15 @@ async function startArena() {
     charNameDisp.textContent = characterName;
     sceneLabel.textContent = sceneDesc.slice(0, 80) + (sceneDesc.length > 80 ? '...' : '');
 
-    // Render profile and auto-show it
-    renderProfile(data.character);
+    renderProfile(result.character);
     profileSidebar.classList.remove('hidden');
     profileToggle.classList.add('active');
     profileToggle.textContent = 'Hide Profile';
 
-    // System message
     addMessage('system', null, `${characterName} materializes before you. The scene is set.`);
-
     userInput.focus();
   } catch (e) {
-    showStatus(e.message, 'error');
+    appendLogEntry('error', e.message, false);
     showToast(`Failed to start arena: ${e.message}`);
   } finally {
     startBtn.disabled = false;
@@ -343,6 +416,7 @@ function renderProfile(character) {
     { label: 'Teleology',              value: character.teleology },
     { label: 'Philosophy',             value: character.philosophy },
     { label: 'Physical State',         value: character.physical_state },
+    { label: 'Voice & Speech Style',   value: character.voice_style },
     { label: 'Long-Term Memory',       value: character.long_term_memory, list: true },
     { label: 'Short-Term Memory',      value: character.short_term_memory, list: true },
     { label: 'Internal Contradictions', value: character.internal_contradictions, list: true },
@@ -407,7 +481,7 @@ function renderWorldDetails(data) {
   // Character fields
   if (data.character) {
     const charFields = [
-      'internal_state', 'ambitions', 'teleology', 'philosophy', 'physical_state',
+      'internal_state', 'ambitions', 'teleology', 'philosophy', 'physical_state', 'voice_style',
     ];
     charFields.forEach(f => {
       if (data.character[f]) {
@@ -467,16 +541,5 @@ function resetToSetup() {
   worldToggle.textContent = 'World';
   gamePanel.classList.add('hidden');
   setupPanel.classList.remove('hidden');
-  hideStatus();
-}
-
-// ─── Status helpers ─────────────────────────────────────────────────────
-function showStatus(html, type) {
-  setupStatus.innerHTML = html;
-  setupStatus.className = `status ${type}`;
-  setupStatus.classList.remove('hidden');
-}
-
-function hideStatus() {
-  setupStatus.classList.add('hidden');
+  hideLog();
 }

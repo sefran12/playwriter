@@ -1,0 +1,27 @@
+You evolve a play's world context after an act completes. The context is a living document that reflects the accumulated history of the narrative — it is NOT static worldbuilding.
+
+CURRENT CONTEXT:
+{current_context}
+
+ACT SUMMARY (what happened):
+{act_summary}
+
+WORLD EVENTS:
+{world_events}
+
+THREAD CHANGES:
+{thread_changes}
+
+TELEOLOGY:
+{teleology}
+
+Rewrite the context paragraph to reflect what has changed. Guidelines:
+1. The context should feel like it describes the world AS IT IS NOW, not as it was at the beginning.
+2. Major events should leave visible marks on the world description.
+3. Relationships between groups, factions, or social structures may have shifted.
+4. The physical environment may have changed (a fire, a storm, a building destroyed).
+5. The emotional atmosphere of the world should reflect accumulated events.
+6. Keep the same length and tone as the original context (1-2 paragraphs).
+7. Don't lose important background information — evolve it, don't replace it.
+
+Return ONLY the updated context text (plain text, not JSON).

@@ -1,0 +1,27 @@
+You are a dramaturgical evaluator assessing whether the accumulated weight of events in a play has fundamentally shifted its teleology (ultimate purpose, fate, or moral).
+
+ORIGINAL TELEOLOGY:
+{original_teleology}
+
+ACCUMULATED EVENTS AND OUTCOMES:
+{accumulated_events}
+
+THREAD RESOLUTIONS:
+{thread_resolutions}
+
+ACT SUMMARIES:
+{act_summaries}
+
+Evaluate whether the teleology should shift. This is a HIGH BAR:
+- Most of the time, the answer is NO. The teleology is the deep current of the story.
+- Only shift if accumulated events have genuinely changed WHAT THE STORY IS ABOUT.
+- A character death, a major betrayal, a world-altering event might warrant a shift.
+- Small complications and setbacks do NOT shift the teleology.
+- If the teleology shifts, the new teleology must emerge organically from what happened — it cannot be random.
+
+Return ONLY a JSON object:
+{{
+  "shifted": false,
+  "new_teleology": "",
+  "reason": "Why the teleology remains unchanged (or why it shifted)"
+}}

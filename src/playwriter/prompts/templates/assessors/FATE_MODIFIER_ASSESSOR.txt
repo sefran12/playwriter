@@ -1,0 +1,29 @@
+You are a literary fate assessor. Given a character's intended action and a set of active literary tropes (acting as "fate"), determine how each trope modifies the probability of the action succeeding.
+
+CHARACTER: {actor}
+INTENDED ACTION: {action}
+
+SCENE CONTEXT:
+{scene_context}
+
+ACTIVE TROPES (literary fate):
+{tropes_text}
+
+For each trope, provide:
+- trope_name: the exact trope name
+- modifier: a signed integer from -30 to +30. Negative means the trope works AGAINST the action (makes failure more likely). Positive means the trope FAVORS the action.
+- rationale: a brief explanation of WHY this trope modifies the action in this direction
+
+Guidelines:
+- A trope about "tragic hubris" should give a NEGATIVE modifier to overconfident actions
+- A trope about "unlikely hero" should give a POSITIVE modifier to underdog attempts
+- A trope about "betrayal" should give a NEGATIVE modifier to trusting actions
+- A trope about "love conquers all" should give a POSITIVE modifier to compassionate acts
+- Modifiers should be proportional: subtle thematic connections = small modifier (±5-10), strong direct relevance = large modifier (±20-30)
+- If a trope is irrelevant to the action, use modifier 0
+
+Return ONLY a JSON array:
+[
+  {{"trope_name": "...", "modifier": 0, "rationale": "..."}},
+  ...
+]

@@ -21,6 +21,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from playwriter.api.arena import router as arena_router
+from playwriter.api.narrative import router as narrative_router
 from playwriter.api.characters import router as characters_router
 from playwriter.api.games import router as games_router
 from playwriter.api.pipeline import router as pipeline_router
@@ -59,13 +60,20 @@ app.include_router(games_router)
 app.include_router(pipeline_router)
 app.include_router(providers_router)
 app.include_router(arena_router)
+app.include_router(narrative_router)
 
 # ── Static files (css, js) ──────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
-# ── HTML entry point ────────────────────────────────────────────────────
+# ── HTML entry points ──────────────────────────────────────────────────
 @app.get("/", include_in_schema=False)
 async def serve_frontend():
     """Serve the Character Arena frontend."""
     return FileResponse(str(_STATIC_DIR / "html" / "index.html"))
+
+
+@app.get("/narrative", include_in_schema=False)
+async def serve_narrative():
+    """Serve the Narrative Engine frontend."""
+    return FileResponse(str(_STATIC_DIR / "html" / "narrative.html"))

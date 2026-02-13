@@ -11,12 +11,15 @@ All state is held server-side per session.
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 import uuid
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 
 from playwriter.llm.registry import get_provider
 from playwriter.memory.conversation import ConversationMemory
@@ -173,6 +176,123 @@ async def start_arena(body: StartRequest):
     )
 
 
+@router.post("/start/stream")
+async def start_arena_stream(body: StartRequest):
+    """Generate a character and start an arena session, streaming progress via SSE."""
+    progress_queue: asyncio.Queue = asyncio.Queue()
+
+    async def _progress(step: str, detail: str, **extra):
+        event = {"step": step, "detail": detail, **extra}
+        await progress_queue.put(event)
+
+    async def _run():
+        provider_name = get_active_provider()
+        active_model = get_active_model()
+        strong = get_provider(provider_name, tier="strong", model=active_model)
+
+        await _progress("generating", "Designing character from description...")
+
+        format_instructions = OutputParser.format_instructions(Character)
+        prompt = _prompts.render(
+            "generators",
+            "FIRST_PASS_CHARACTER_DESIGNER",
+            tcc_context=body.tcc_context,
+            character_description=body.character_description,
+            format_instructions=format_instructions,
+        )
+        character = await strong.complete_structured(
+            system_prompt="You are an expert character designer for theatrical plays.",
+            user_prompt=prompt,
+            response_model=Character,
+        )
+
+        snippets = []
+        if character.name:
+            snippets.append(f"Name: {character.name}")
+        if character.philosophy:
+            snippets.append(f"Philosophy: {character.philosophy[:120]}...")
+        if character.voice_style:
+            snippets.append(f"Voice: {character.voice_style[:120]}...")
+        if character.ambitions:
+            snippets.append(f"Ambitions: {character.ambitions[:120]}...")
+        await _progress("generated", "\n".join(snippets) or f"Character designed: {character.name}")
+
+        await _progress("refining", f"Refining and deepening {character.name}...")
+
+        refine_prompt = _prompts.render(
+            "refiners",
+            "FULL_DESCRIPTION_CHARACTER_REFINER",
+            tcc_context=body.tcc_context,
+            character_profile=character.to_prompt_text(),
+            format_instructions=format_instructions,
+        )
+        try:
+            character = await strong.complete_structured(
+                system_prompt="You are a master character developer. Reimagine and deepen this character.",
+                user_prompt=refine_prompt,
+                response_model=Character,
+            )
+        except Exception as exc:
+            await _progress("refine_warning", f"Refinement failed, using initial version: {exc}")
+
+        refined_snippets = []
+        if character.philosophy:
+            refined_snippets.append(f"Philosophy: {character.philosophy[:150]}...")
+        if character.voice_style:
+            refined_snippets.append(f"Voice: {character.voice_style[:150]}...")
+        if character.internal_contradictions:
+            refined_snippets.append(f"Contradictions: {'; '.join(character.internal_contradictions)[:150]}...")
+        await _progress("refined", "\n".join(refined_snippets) or f"Character refined: {character.name}")
+
+        await _progress("embodying", "Building embodiment prompt for scene...")
+
+        system_prompt = _prompts.render(
+            "embodiers",
+            "CHARACTER_EMBODIER",
+            tcc_context=body.tcc_context,
+            character_profile=character.to_prompt_text(),
+            scene_description=body.scene_description,
+        )
+
+        session_id = uuid.uuid4().hex[:12]
+        session = _ArenaSession()
+        session.tcc_context = body.tcc_context
+        session.character = character
+        session.scene_description = body.scene_description
+        session.system_prompt = system_prompt
+        session.character_name = character.name or "Character"
+        _sessions[session_id] = session
+
+        return session_id, character, session.character_name
+
+    async def generator():
+        task = asyncio.create_task(_run())
+
+        while not task.done():
+            try:
+                msg = await asyncio.wait_for(progress_queue.get(), timeout=0.5)
+                yield f"data: {json.dumps(msg)}\n\n"
+            except asyncio.TimeoutError:
+                continue
+
+        # Drain remaining
+        while not progress_queue.empty():
+            msg = progress_queue.get_nowait()
+            yield f"data: {json.dumps(msg)}\n\n"
+
+        try:
+            session_id, character, character_name = task.result()
+            yield f"data: {json.dumps({'step': 'done', 'session_id': session_id, 'character': character.model_dump(), 'character_name': character_name})}\n\n"
+        except Exception as exc:
+            yield f"data: {json.dumps({'step': 'error', 'detail': str(exc)})}\n\n"
+
+    return StreamingResponse(
+        generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+    )
+
+
 @router.post("/chat", response_model=ChatResponse)
 async def arena_chat(body: ChatRequest):
     """Chat with the embodied character in an arena session."""
@@ -191,8 +311,9 @@ async def arena_chat(body: ChatRequest):
     history = session.memory.to_prompt_text()
     user_prompt = (
         f"Conversation so far:\n{history}\n\n"
-        f"Respond as the character. Use the play format: "
-        f"(action description) Dialogue"
+        f"Respond as the character would naturally speak in this specific situation. "
+        f"Follow their Voice & Speech Style. Use the play format: (action description) Dialogue. "
+        f"Keep it real — not every line needs to be profound."
     )
     try:
         response = await llm.complete(
