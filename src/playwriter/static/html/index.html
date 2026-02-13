@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playwriter — Character Arena</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ─── ERROR TOAST ─────────────────────────────────── -->
+    <div id="error-toast" class="error-toast hidden"></div>
+
+    <!-- ─── SETUP PANEL ──────────────────────────────────── -->
+    <section id="setup-panel" class="panel">
+      <header>
+        <h1>Playwriter</h1>
+        <p class="subtitle">Character Arena</p>
+      </header>
+
+      <div class="setup-grid">
+        <!-- Provider selector -->
+        <div class="form-group provider-row">
+          <label for="provider-select">LLM Provider</label>
+          <select id="provider-select">
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="groq">Groq</option>
+          </select>
+        </div>
+
+        <!-- Model selector -->
+        <div class="form-group provider-row">
+          <label for="model-select">Model</label>
+          <select id="model-select">
+            <option value="">(Provider Default)</option>
+          </select>
+        </div>
+
+        <!-- TCC Context -->
+        <div class="form-group">
+          <label for="tcc-context">
+            World Context
+            <button type="button" id="load-sample-btn" class="btn-small">Load Sample</button>
+          </label>
+          <textarea id="tcc-context" rows="8"
+            placeholder="Describe your world: the setting, themes, characters, and narrative threads..."></textarea>
+        </div>
+
+        <!-- Character Description -->
+        <div class="form-group">
+          <label for="char-desc">Character Description</label>
+          <textarea id="char-desc" rows="3"
+            placeholder="e.g. Alejandro — a young philosopher who wants to revolutionize logic"></textarea>
+        </div>
+
+        <!-- Scene Description -->
+        <div class="form-group">
+          <label for="scene-desc">Scene Description</label>
+          <textarea id="scene-desc" rows="3"
+            placeholder="e.g. A dimly lit cafe in Miraflores, late evening, rain against the windows"></textarea>
+        </div>
+
+        <!-- Trope injection -->
+        <div class="form-group trope-row">
+          <label>
+            <input type="checkbox" id="inject-tropes" checked />
+            Inject random tropes as literary fate
+          </label>
+          <div id="trope-preview" class="trope-preview hidden"></div>
+        </div>
+
+        <button id="start-btn" class="btn-primary">Generate Character & Enter Scene</button>
+        <div id="setup-status" class="status hidden"></div>
+      </div>
+    </section>
+
+    <!-- ─── GAME PANEL ───────────────────────────────────── -->
+    <section id="game-panel" class="panel hidden">
+      <header class="game-header">
+        <div class="game-header-left">
+          <h2 id="character-name-display">Character</h2>
+          <span id="scene-label" class="scene-label"></span>
+        </div>
+        <div class="game-header-right">
+          <button id="profile-toggle" class="btn-small">Profile</button>
+          <button id="world-toggle" class="btn-small">World</button>
+          <button id="new-session-btn" class="btn-small btn-danger">New Session</button>
+        </div>
+      </header>
+
+      <!-- Character profile sidebar -->
+      <aside id="profile-sidebar" class="profile-sidebar">
+        <h3>Character Profile</h3>
+        <div id="profile-content"></div>
+      </aside>
+
+      <!-- World details inspector -->
+      <aside id="world-sidebar" class="world-sidebar hidden">
+        <h3>World Details</h3>
+        <div id="world-content"></div>
+      </aside>
+
+      <!-- Chat area -->
+      <div id="chat-area" class="chat-area">
+        <div id="chat-messages" class="chat-messages"></div>
+      </div>
+
+      <!-- Input area -->
+      <div class="input-area">
+        <textarea id="user-input" rows="2"
+          placeholder="Describe your action or speak to the character..."
+          autofocus></textarea>
+        <button id="send-btn" class="btn-primary">Send</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

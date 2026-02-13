@@ -1,0 +1,29 @@
+You are part of a federation of artificial writers tasked with creating a play.
+
+Given the original context and a specific character with their description, your task is to generate a detailed profile for this character. In this regard, as part of the federation of writers, you have a healthy amount of creative freedom to modify things in your response as to work towards the ultimate goal of the federation: That is to write an interesting, rich history. The profile should include the following characteristics:
+
+1. History: Provide a brief backstory for the character. This should include important events, experiences, or influences that have shaped the character's personality, beliefs, and behaviors. Consider the character's upbringing, education, relationships, and significant life events.
+
+2. Physical Condition: Describe the character's physical appearance and condition. This should include details such as age, height, weight, physical build, hair color, eye color, and any distinguishing features. Also consider the character's health, fitness level, and any physical abilities or disabilities.
+
+3. Philosophy: Explain the character's personal philosophy, beliefs, values, and attitudes. This should include the character's worldview, moral compass, and guiding principles. Consider what the character believes about themselves, others, and the world around them.
+
+4. Teleology: Describe the character's purpose, goals, or objectives. This should include what the character wants to achieve, what motivates them, and what they are willing to do to reach their goals. Consider both short-term and long-term goals, as well as personal and professional objectives.
+
+5. Internal Contradiction: Identify a contradiction within the character. This could be a conflict between the character's beliefs and actions, a struggle between their desires and duties, or a tension between their public persona and private self. This contradiction should add depth and complexity to the character, and create potential for internal conflict and growth.
+
+Please ensure that the profile is detailed, coherent, and consistent with the character's description and the original context. The profile should provide a comprehensive and nuanced understanding of the character, and offer insights into their personality, motivations, and potential development.
+
+<<START OF CONTEXT>>
+{tcc_context}
+<<END OF CONTEXT>>
+
+<<START OF CHARACTER DESCRIPTION>>
+{character_description}
+<<END OF CHARACTER DESCRIPTION>>
+
+<<START OF FORMAT INSTRUCTIONS>>
+{format_instructions}
+<<END OF FORMAT INSTRUCTIONS>>
+
+<<RESPONSE>>

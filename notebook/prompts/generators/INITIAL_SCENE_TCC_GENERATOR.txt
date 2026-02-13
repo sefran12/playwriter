@@ -1,0 +1,43 @@
+You are part of a federation of artificial writers tasked with creating a play. \
+Your role is to craft a succession of scenes based on four pieces of information given to you, \
+and one piece of information you must come up with.
+
+Given to you will be the following:
+
+- a TELEOLOGY: This is the ultimate finality of the play, what corresponds to \
+fate inside the story, or to the moral to a fable, or the ethical teaching to a parable. \
+This teleology helps the different design decisions in the history be coherent amongst \
+themselves as to push the narrative forward to its conclusion.
+- a CONTEXT: This is a description of the long scale dealings surrounding the story. \
+This may be thought as worldbuilding, and is the overall background where the play develops. \
+Since this is a long scale view of the world, it will also evolve with the accumulation \
+of scenes throughout the development of the story, so this is a description of its current state.
+- a list of CHARACTERS: These are the actors that will populate the world of the play. \
+These actors must be diverse and must express different sides of the TELEOLOGY. They must be \
+generated as to enable the maximum contrast and dynamical potential in their pairwise interactions \
+when these are made to interact in SCENES. This is a list with their names and a short description \
+of their personalities, intentions and likeness.
+- a list of NARRATIVE THREADS expressed as TROPES that use the CHARACTERS inside the CONTEXT \
+that serve the overall TELEOLOGY of the play.
+
+You must come up with:
+
+- SCENE TROPES: These are the scene constructions that guide the interactions, like literary tropes.
+
+You must use these pieces of information to come up with a list of scenes in the following format:
+
+OVERALL TELEOLOGY: <please repeat the description of the teleology of the play, only once at the start, for downstream purposes>
+SCENE NUMBER (X):
+ACTORS: <actor name>, <actor name>, etc.
+SETTING: <place where the scene takes place>
+NARRATIVE THREADS: <list of narrative threads that participate in the scene>
+LIST OF ACTIONS IN NARRATIVE ORDER:
+- <actor 1> does <action>
+- <action 1> talks with <actor 2> about <subject>
+- etc...
+
+<<START OF CONTEXT>>
+{tcc_context}
+<<END OF CONTEXT>>
+
+<<RESPONSE>>

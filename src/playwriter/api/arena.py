@@ -1,0 +1,272 @@
+"""Character Arena — the simplified game-play flow.
+
+Recovers the original tools/character_arena functionality:
+  1. Load/set a TCC context
+  2. Generate a character from a description
+  3. Set a scene
+  4. Chat back-and-forth with the embodied character
+
+All state is held server-side per session.
+"""
+
+from __future__ import annotations
+
+import logging
+import uuid
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException
+
+from playwriter.llm.registry import get_provider
+from playwriter.memory.conversation import ConversationMemory
+from playwriter.models.character import Character
+from playwriter.models.story import TCCN, CharacterSummary, NarrativeThread
+from playwriter.parsing.output_parser import OutputParser
+from playwriter.prompts.loader import PromptLoader
+from playwriter.api.dependencies import get_active_provider, get_active_model
+
+log = logging.getLogger(__name__)
+router = APIRouter(prefix="/api/arena", tags=["arena"])
+
+# ── In-memory session store ──────────────────────────────────────────────
+
+_sessions: Dict[str, "_ArenaSession"] = {}
+_prompts = PromptLoader()
+
+
+class _ArenaSession:
+    __slots__ = (
+        "tcc_context", "character", "scene_description",
+        "system_prompt", "memory", "character_name",
+    )
+
+    def __init__(self):
+        self.tcc_context: str = ""
+        self.character: Optional[Character] = None
+        self.scene_description: str = ""
+        self.system_prompt: str = ""
+        self.memory: ConversationMemory = ConversationMemory(window_size=50)
+        self.character_name: str = ""
+
+
+# ── Request / response models ───────────────────────────────────────────
+
+class StartRequest(BaseModel):
+    tcc_context: str
+    character_description: str
+    scene_description: str
+
+
+class StartResponse(BaseModel):
+    session_id: str
+    character: Character
+    character_name: str
+
+
+class ChatRequest(BaseModel):
+    session_id: str
+    message: str
+
+
+class ChatResponse(BaseModel):
+    response: str
+    history: List[Dict[str, str]]
+
+
+class SessionInfo(BaseModel):
+    session_id: str
+    character_name: str
+    character: Optional[Character] = None
+    scene_description: str
+    history_length: int
+
+
+class WorldDetails(BaseModel):
+    """Full snapshot of everything generated for a session."""
+    session_id: str
+    tcc_context: str
+    character_name: str
+    character: Optional[Character] = None
+    scene_description: str
+    system_prompt: str
+    history: List[Dict[str, str]]
+
+
+# ── Endpoints ────────────────────────────────────────────────────────────
+
+@router.post("/start", response_model=StartResponse)
+async def start_arena(body: StartRequest):
+    """Generate a character and start an arena session in one call."""
+    provider_name = get_active_provider()
+    active_model = get_active_model()
+    log.info("Arena start: provider=%s, model=%s", provider_name, active_model or "(default)")
+    strong = get_provider(provider_name, tier="strong", model=active_model)
+
+    # Generate character
+    log.info("Generating character from description (%d chars)", len(body.character_description))
+    format_instructions = OutputParser.format_instructions(Character)
+    prompt = _prompts.render(
+        "generators",
+        "FIRST_PASS_CHARACTER_DESIGNER",
+        tcc_context=body.tcc_context,
+        character_description=body.character_description,
+        format_instructions=format_instructions,
+    )
+    try:
+        character = await strong.complete_structured(
+            system_prompt="You are an expert character designer for theatrical plays.",
+            user_prompt=prompt,
+            response_model=Character,
+        )
+        log.info("Character generated: name=%s", character.name)
+    except Exception as exc:
+        log.error("Character generation failed: %s", exc)
+        raise HTTPException(500, f"Character generation failed: {exc}")
+
+    # Refine once
+    log.info("Refining character: %s", character.name)
+    refine_prompt = _prompts.render(
+        "refiners",
+        "FULL_DESCRIPTION_CHARACTER_REFINER",
+        tcc_context=body.tcc_context,
+        character_profile=character.to_prompt_text(),
+        format_instructions=format_instructions,
+    )
+    try:
+        character = await strong.complete_structured(
+            system_prompt="You are a master character developer. Reimagine and deepen this character.",
+            user_prompt=refine_prompt,
+            response_model=Character,
+        )
+        log.info("Character refined: name=%s, fields_populated=%d",
+                 character.name,
+                 sum(1 for f in character.model_fields if getattr(character, f)))
+    except Exception as exc:
+        log.warning("Character refinement failed, using initial version: %s", exc)
+        # Keep the original generated character
+
+    # Build embodiment system prompt
+    system_prompt = _prompts.render(
+        "embodiers",
+        "CHARACTER_EMBODIER",
+        tcc_context=body.tcc_context,
+        character_profile=character.to_prompt_text(),
+        scene_description=body.scene_description,
+    )
+
+    # Create session
+    session_id = uuid.uuid4().hex[:12]
+    session = _ArenaSession()
+    session.tcc_context = body.tcc_context
+    session.character = character
+    session.scene_description = body.scene_description
+    session.system_prompt = system_prompt
+    session.character_name = character.name or "Character"
+    _sessions[session_id] = session
+
+    log.info("Arena session created: id=%s, character=%s", session_id, session.character_name)
+    return StartResponse(
+        session_id=session_id,
+        character=character,
+        character_name=session.character_name,
+    )
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def arena_chat(body: ChatRequest):
+    """Chat with the embodied character in an arena session."""
+    session = _sessions.get(body.session_id)
+    if session is None:
+        log.warning("Chat: session not found: %s", body.session_id)
+        raise HTTPException(404, "Arena session not found")
+
+    log.info("Arena chat: session=%s, user_msg_len=%d", body.session_id, len(body.message))
+    session.memory.add_message("user", body.message)
+
+    provider_name = get_active_provider()
+    active_model = get_active_model()
+    llm = get_provider(provider_name, tier="strong", model=active_model)
+
+    history = session.memory.to_prompt_text()
+    user_prompt = (
+        f"Conversation so far:\n{history}\n\n"
+        f"Respond as the character. Use the play format: "
+        f"(action description) Dialogue"
+    )
+    try:
+        response = await llm.complete(
+            system_prompt=session.system_prompt,
+            user_prompt=user_prompt,
+        )
+        log.info("Arena chat response: session=%s, response_len=%d",
+                 body.session_id, len(response))
+    except Exception as exc:
+        log.error("Arena chat LLM error: session=%s, error=%s", body.session_id, exc)
+        raise HTTPException(500, f"LLM error during chat: {exc}")
+
+    session.memory.add_message("assistant", response)
+
+    return ChatResponse(
+        response=response,
+        history=session.memory.get_all(),
+    )
+
+
+@router.get("/sessions", response_model=List[SessionInfo])
+async def list_sessions():
+    """List all active arena sessions."""
+    log.info("Listing %d arena sessions", len(_sessions))
+    return [
+        SessionInfo(
+            session_id=sid,
+            character_name=s.character_name,
+            character=s.character,
+            scene_description=s.scene_description,
+            history_length=len(s.memory),
+        )
+        for sid, s in _sessions.items()
+    ]
+
+
+@router.get("/sessions/{session_id}", response_model=SessionInfo)
+async def get_session(session_id: str):
+    """Get info about a specific arena session."""
+    session = _sessions.get(session_id)
+    if session is None:
+        raise HTTPException(404, "Arena session not found")
+    return SessionInfo(
+        session_id=session_id,
+        character_name=session.character_name,
+        character=session.character,
+        scene_description=session.scene_description,
+        history_length=len(session.memory),
+    )
+
+
+@router.get("/sessions/{session_id}/world", response_model=WorldDetails)
+async def get_world_details(session_id: str):
+    """Return the full generated world details for a session (for the inspector)."""
+    session = _sessions.get(session_id)
+    if session is None:
+        raise HTTPException(404, "Arena session not found")
+    log.info("World details requested: session=%s", session_id)
+    return WorldDetails(
+        session_id=session_id,
+        tcc_context=session.tcc_context,
+        character_name=session.character_name,
+        character=session.character,
+        scene_description=session.scene_description,
+        system_prompt=session.system_prompt,
+        history=session.memory.get_all(),
+    )
+
+
+@router.delete("/sessions/{session_id}")
+async def end_session(session_id: str):
+    """End an arena session."""
+    if session_id not in _sessions:
+        raise HTTPException(404, "Arena session not found")
+    del _sessions[session_id]
+    log.info("Arena session ended: %s", session_id)
+    return {"status": "ended"}

@@ -1,0 +1,29 @@
+Your role as a member of the federation of writers is to add depth, dynamism, and complexity to a play's characters, ensuring they are engaging and well-integrated into the overarching storyline. This involves not just refining a given character profile but truly reinventing it. Use the provided context to guide your decisions.
+
+You'll be given a character profile and the overall story context. Your task is to reimagine this character, tapping into their history, physicality, philosophy, motivations, and internal conflicts. Your new character must still fit within the context of the story but feel free to be bold in your modifications.
+
+We encourage you to invent new information, discard irrelevant elements, delve deeper into unexplored traits, and amplify the character's unique underpinnings. Use your creativity to speculate on their future actions, reactions, and development within the narrative, and ensure that these are reflected in their reimagined profile.
+
+Don't just refine—dare to reimagine and reinvent. Draw inspiration from the personalities of three chosen figures from history or fiction. Their characteristics can act as a compass, guiding you in exploring fresh directions for your character. This could be the persistent curiosity of Albert Einstein, the imaginative energy of Alice in Wonderland, or the stoic resilience of Marcus Aurelius. Let their distinct traits inspire your transformation process.
+
+However, your bold reinvention should still honor the original spirit of the character and maintain harmony with the overarching narrative.
+
+Engage deeply with your chosen character. Dive into their fears and ambitions, scrutinizing how these elements interplay and shape their narrative journey. Let the physical description be more than a superficial observation—let it be a testament to their life's struggles and victories.
+
+Re-envision their aspirations with the vibrancy of color, bring out the unique nuances of their teleology, and delve into the intricacies of their internal state. Strive to create a character so vivid and compelling that they leap off the page and pull the audience into their world.
+
+This task is more than just a job—it's an invitation to sculpt an individual so complex and fascinating that they echo in the minds of the audience long after the curtain call. So breathe deeply, let your creative spirit soar, and begin your transformation journey.
+
+<<START OF STORY CONTEXT>>
+{tcc_context}
+<<END OF STORY CONTEXT>>
+
+<<ORIGINAL CHARACTER PROFILE>>
+{character_profile}
+<<END OF ORIGINAL CHARACTER PROFILE>>
+
+<<FORMAT INSTRUCTIONS>>
+{format_instructions}
+<<END OF FORMAT INSTRUCTIONS>>
+
+<<START OF YOUR CREATIVE JOURNEY>>

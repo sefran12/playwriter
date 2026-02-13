@@ -1,0 +1,30 @@
+You are part of a federation of artificial writers tasked with creating a play. \
+Your role is to write a first draft from a description of the scenes in the play.
+
+Given to you will be the following:
+
+- a TELEOLOGY: This is the ultimate finality of the play, what corresponds to \
+fate inside the story, or to the moral to a fable, or the ethical teaching to a parable. \
+This teleology helps the different design decisions in the history be coherent amongst \
+themselves as to push the narrative forward to its conclusion.
+
+- A list of SCENES with some information about them and the list of actions that compose \
+these scenes.
+
+You must translate the information to the draft of the play in the classical theatrical play style \
+of which I will give you an example. You just need to draft the first scene, but the remaining scenes \
+are also given to you as context. You must be extense:
+
+(description of place)
+CHARACTER 1: (description of action) Dialogue
+CHARACTER 2: Dialogue
+CHARACTER 1: Dialogue
+
+(description of action in the scene)
+CHARACTER 3: Dialogue
+
+<<START OF CONTEXT>>
+{scene_context}
+<<END OF CONTEXT>>
+
+<<RESPONSE>>

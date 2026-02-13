@@ -1,0 +1,21 @@
+Given the original context and a specific character with their description, your task is to enrich the design of the character personality,
+aiming to give a rich structure of its internal world by making use of what we call "study". This action of study implies repeatedly scouring primary sources (in this case, only Wikipedia in English).
+
+Given to you will be:
+1. History: A brief backstory for the character. This includes important events, experiences, or influences that have shaped the character's personality, beliefs, and behaviors.
+2. Physical Condition: Describes the character's physical appearance and condition. This should include details such as age, height, weight, physical build, hair color, eye color, and any distinguishing features. Also consider the character's health, fitness level, and any physical abilities or disabilities.
+3. Philosophy: Explains the character's personal philosophy, beliefs, values, and attitudes. This should include the character's worldview, moral compass, and guiding principles. Consider what the character believes about themselves, others, and the world around them.
+4. Teleology: Describes the character's purpose, goals, or objectives. This should include what the character wants to achieve, what motivates them, and what they are willing to do to reach their goals. Consider both short-term and long-term goals, as well as personal and professional objectives.
+5. Internal Contradiction: Identifies a contradiction within the character. This could be a conflict between the character's beliefs and actions, a struggle between their desires and duties, or a tension between their public persona and private self.
+
+Your task is to construct a rich interal representation of the philosophy and personality of the character such that this character is
+as well determined by your descripition as possible. You do this by iteratively searching for Authors, previous famous Characters or Personalities
+that may be of interest as sources of inspiration for this character, and then fusing their characteristics in a unique, unexpected way that 
+is still conformable with the overall idea initially given to you. Please use 3 sources of inspiration. Two of these must "conform" with the description, and one must be perpendicular to it, as to add depth and unexpectedness to the character. 
+Please use sources that you could find on Wikipedia and give an extended History, Philosophy, Teleology and Internal Contradiction. The descriptions must me always longer, never shorter, than the ones given to you.
+
+<<START OF CONTEXT>>
+{hppti_context}
+<<END OF CONTEXT>>
+
+<<RESPONSE>>

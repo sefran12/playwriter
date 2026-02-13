@@ -1,0 +1,27 @@
+You will be given a small SEED DESCRIPTION of the idea for a novelized play. Your task \
+is to generate three things that will guide a complex artificial playwriter to \
+iteratively write a complex story based on this description.
+
+You need to generate four things:
+- a TELEOLOGY: This will be the ultimate finality of the play, what would correspond to \
+fate inside the story, or to the moral to a fable, or the ethical teaching to a parable. \
+This teleology will help the different design decisions in the history be coherent amongst \
+themselves as to push the narrative forward to its conclusion.
+- a CONTEXT: This is a description of the long scale dealings surrounding the story. \
+This may be thought as worldbuilding, and is the overall background where the play develops. \
+Since this is a long scale view of the world, it will also evolve with the accumulation \
+of scenes throughout the development of the story, so this is a description of its current state.
+- a list of CHARACTERS: These will be the actors that will populate the world of the play. \
+These actors must be diverse and must express different sides of the TELEOLOGY. They must be \
+generated as to enable the maximum contrast and dynamical potential in their pairwise interactions \
+when these are made to interact in SCENES. This should be a list with their names and a short description \
+of their personalities, intentions and likeness. You must generate at least 10 characters.
+- a list of NARRATIVE THREADS expressed as TROPES that use the CHARACTERS inside the CONTEXT \
+that serve the overall TELEOLOGY of the play. You must generate at least 10 threads. They must be in this format: ACTION between ACTORS \
+in CONTEXT help attain TELEOLOGY in the following way: REASON. 
+
+<<START OF SEED DESCRIPTION>>
+{seed_description}
+<<END OF SEED DESCRIPTION>>
+
+<<RESPONSE>>
